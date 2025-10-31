@@ -1,4 +1,5 @@
 <x-app-layout>
+    <x-slot name="title">Manajemen User</x-slot>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Edit User') }}
@@ -21,21 +22,21 @@
                                 <div>
                                     <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                                     <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" 
-                                          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                     @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
                                     <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
                                     <input type="text" name="username" id="username" value="{{ old('username', $user->username) }}" 
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                     @error('username') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
                                     <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                                     <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" 
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                     @error('email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                                 </div>
                             </div>
@@ -46,9 +47,9 @@
                                     @foreach($roles as $role)
                                     <div class="flex items-center">
                                         <input type="checkbox" name="roles[]" value="{{ $role->name }}" 
-                                               id="role_{{ $role->id }}" 
-                                               {{ $user->hasRole($role->name) ? 'checked' : '' }}
-                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                            id="role_{{ $role->id }}" 
+                                            {{ $user->hasRole($role->name) ? 'checked' : '' }}
+                                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                                         <label for="role_{{ $role->id }}" class="ml-2 text-sm text-gray-700">
                                             {{ $role->name }}
                                         </label>
@@ -60,7 +61,7 @@
 
                             <div class="flex items-center justify-between mt-8">
                                 <a href="{{ route('admin.users.index') }}" 
-                                  class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                                     Kembali
                                 </a>
                                 <button type="submit" 
