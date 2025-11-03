@@ -36,6 +36,20 @@
             </div>
             @endif
 
+            {{-- Class Management --}}
+            @can('class.view')
+            <div class="pt-4">
+                <h3 class="text-xs uppercase tracking-wider text-gray-400 font-semibold pl-3 mb-2">Kelas</h3>
+                
+                <x-sidebar-link :href="route('classes.index')" :active="request()->routeIs('classes.*')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span>Manajemen Kelas</span>
+                </x-sidebar-link>
+            </div>
+            @endcan
+
             <!-- Products Section -->
             <div class="pt-4">
                 <h3 class="text-xs uppercase tracking-wider text-gray-400 font-semibold pl-3 mb-2">Produk</h3>

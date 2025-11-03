@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
+use App\Models\Classes\ClassModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -26,6 +27,8 @@ class User extends Authenticatable
         'password',
         'remember_token', // Kita keep remember_token untuk functionality Breeze
     ];
+
+    protected $guard_name = 'web';
 
     protected function casts(): array
     {

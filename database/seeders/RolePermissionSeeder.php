@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use App\Models\User;
+use App\Models\Users\User;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -58,17 +58,17 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::create(['name' => $permission, 'guard_name' => 'web']);
         }
 
         // ==================== CREATE ROLES ====================
         
         // SUPER ADMIN - Full access
-        $superAdmin = Role::create(['name' => 'super_admin']);
+        $superAdmin = Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
         $superAdmin->givePermissionTo(Permission::all());
 
         // ADMIN - Almost full access
-        $admin = Role::create(['name' => 'admin']);
+        $admin = Role::create(['name' => 'admin', 'guard_name' => 'web']);
         $admin->givePermissionTo([
             'user.view', 'user.create', 'user.edit', 'user.delete', 'user.roles',
             'product.view', 'product.create', 'product.edit', 'product.delete', 'product.approve', 'product.manage',
@@ -78,7 +78,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // GURU PKWU - Supervisor role
-        $guruPkwu = Role::create(['name' => 'guru_pkwu']);
+        $guruPkwu = Role::create(['name' => 'guru_pkwu', 'guard_name' => 'web']);
         $guruPkwu->givePermissionTo([
             'user.view',
             'product.view', 'product.approve', 'product.manage',
@@ -88,7 +88,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // WALI KELAS - Class manager
-        $waliKelas = Role::create(['name' => 'wali_kelas']);
+        $waliKelas = Role::create(['name' => 'wali_kelas', 'guard_name' => 'web']);
         $waliKelas->givePermissionTo([
             'user.view',
             'product.view', 'product.create', 'product.edit', 'product.delete',
@@ -98,7 +98,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // GURU BIASA - Basic access
-        $guruBiasa = Role::create(['name' => 'guru_biasa']);
+        $guruBiasa = Role::create(['name' => 'guru_biasa', 'guard_name' => 'web']);
         $guruBiasa->givePermissionTo([
             'user.view',
             'product.view',
@@ -106,60 +106,13 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // STUDENT - Basic user
-        $student = Role::create(['name' => 'student']);
+        $student = Role::create(['name' => 'student', 'guard_name' => 'web']);
         $student->givePermissionTo([
             'product.view',
             'order.view', 'order.create',
         ]);
 
-        // ==================== ASSIGN ROLES TO USERS ====================
-        
-        // Assign super_admin to first user (you)
-        $firstUser = User::first();
-        if ($firstUser) {
-            $firstUser->assignRole('super_admin');
-        }
-
-        // Create demo users for each role (optional)
-        $this->createDemoUsers();
-    }
-
-    private function createDemoUsers(): void
-    {
-        // Demo Admin
-        $admin = User::create([
-            'username' => 'admin_demo',
-            'name' => 'Admin Demo',
-            'email' => 'admin@demo.com',
-            'password' => bcrypt('password123'),
-            'no_hp' => '081234567890',
-            'gender' => 'L',
-            'birth_date' => '1980-01-01',
-        ]);
-        $admin->assignRole('admin');
-
-        // Demo Guru PKWU
-        $guruPkwu = User::create([
-            'username' => 'gurupkwu_demo',
-            'name' => 'Guru PKWU Demo',
-            'email' => 'gurupkwu@demo.com',
-            'password' => bcrypt('password123'),
-            'no_hp' => '081234567891',
-            'gender' => 'P',
-            'birth_date' => '1985-05-15',
-        ]);
-        $guruPkwu->assignRole('guru_pkwu');
-
-        // Demo Student
-        $student = User::create([
-            'username' => 'student_demo',
-            'name' => 'Student Demo',
-            'email' => 'student@demo.com',
-            'password' => bcrypt('password123'),
-            'no_hp' => '081234567892',
-            'gender' => 'L',
-            'birth_date' => '2005-08-20',
-        ]);
-        $student->assignRole('student');
+        $this->command->info('Roles and permissions seeded successfully!');
+        $this->command->info('Roles created: super_admin, admin, guru_pkwu, wali_kelas, guru_biasa, student');
     }
 }

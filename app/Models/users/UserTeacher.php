@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
+use App\Models\Classes\ClassModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,8 @@ class UserTeacher extends Model
         'is_pkwu' => 'boolean',
         'is_wali_kelas' => 'boolean'
     ];
+
+    public $timestamps = false; 
 
     public function user()
     {

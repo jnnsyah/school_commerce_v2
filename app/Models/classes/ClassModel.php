@@ -1,16 +1,20 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Classes;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Users\User;
+use App\Models\Users\UserStudent;
 
 class ClassModel extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'class_id';
     protected $table = 'classes';
+    protected $primaryKey = 'id'; 
+    
+    public $timestamps = true;
 
     protected $fillable = [
         'grade_id',
@@ -22,30 +26,29 @@ class ClassModel extends Model
     /**
      * RELATIONSHIPS
      */
-    
     public function grade()
     {
-        return $this->belongsTo(ClassGrade::class, 'grade_id');
+        return $this->belongsTo(ClassGrade::class, 'grade_id', 'id');
     }
 
     public function major()
     {
-        return $this->belongsTo(ClassMajor::class, 'major_id');
+        return $this->belongsTo(ClassMajor::class, 'major_id', 'id');
     }
 
     public function section()
     {
-        return $this->belongsTo(ClassSection::class, 'section_id');
+        return $this->belongsTo(ClassSection::class, 'section_id', 'id');
     }
 
     public function teacher()
     {
-        return $this->belongsTo(User::class, 'teacher_id');
+        return $this->belongsTo(User::class, 'teacher_id', 'id');
     }
 
     public function students()
     {
-        return $this->hasMany(UserStudent::class, 'class_id');
+        return $this->hasMany(UserStudent::class, 'class_id', 'id');
     }
 
     /**
@@ -53,7 +56,10 @@ class ClassModel extends Model
      */
     public function getFullNameAttribute()
     {
-        return "{$this->grade->name} {$this->major->short_name} {$this->section->name}";
+        if ($this->grade && $this->major && $this->section) {
+            return $this->grade->name . ' ' . $this->major->short_name . ' ' . $this->section->name;
+        }
+        return 'Class Not Found';
     }
 
     public function getStudentCountAttribute()
