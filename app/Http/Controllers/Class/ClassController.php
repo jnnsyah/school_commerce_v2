@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Class;
 
 use App\Http\Controllers\Controller;
-use App\Models\Classes\ClassModel;
-use App\Models\Classes\ClassGrade;
-use App\Models\Classes\ClassMajor;
-use App\Models\Classes\ClassSection;
-use App\Models\Users\User;
-use App\Models\Users\UserStudent;
+use App\Models\Academic\SchoolClass;
+use App\Models\Academic\ClassGrade;
+use App\Models\Academic\ClassMajor;
+use App\Models\Academic\ClassSection;
+use App\Models\User\User;
+use App\Models\User\UserStudent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,7 +17,7 @@ class ClassController extends Controller
 {
     public function index(): View
     {
-        $classes = ClassModel::with(['grade', 'major', 'section', 'teacher', 'students'])
+        $classes = SchoolClass::with(['grade', 'major', 'section', 'teacher', 'students'])
                             ->latest()
                             ->paginate(10);
         
@@ -46,7 +46,7 @@ class ClassController extends Controller
         ]);
 
         // Cek jika kelas sudah ada
-        $existingClass = ClassModel::where('grade_id', $request->grade_id)
+        $existingClass = SchoolClass::where('grade_id', $request->grade_id)
                                 ->where('major_id', $request->major_id)
                                 ->where('section_id', $request->section_id)
                                 ->first();
@@ -57,19 +57,19 @@ class ClassController extends Controller
                 ->withInput();
         }
 
-        ClassModel::create($request->all());
+        SchoolClass::create($request->all());
 
         return redirect()->route('classes.index')
             ->with('success', 'Kelas berhasil dibuat');
     }
 
-    public function show(ClassModel $class): View
+    public function show(SchoolClass $class): View
     {
         $class->load(['grade', 'major', 'section', 'teacher', 'students.user']);
         return view('classes.show', compact('class'));
     }
 
-    public function edit(ClassModel $class): View
+    public function edit(SchoolClass $class): View
     {
         $grades = ClassGrade::all();
         $majors = ClassMajor::all();
@@ -81,7 +81,7 @@ class ClassController extends Controller
         return view('classes.edit', compact('class', 'grades', 'majors', 'sections', 'teachers'));
     }
 
-    public function update(Request $request, ClassModel $class): RedirectResponse
+    public function update(Request $request, SchoolClass $class): RedirectResponse
     {
         $request->validate([
             'grade_id' => 'required|exists:class_grades,id',
@@ -96,7 +96,7 @@ class ClassController extends Controller
             ->with('success', 'Kelas berhasil diupdate');
     }
 
-    public function destroy(ClassModel $class): RedirectResponse
+    public function destroy(SchoolClass $class): RedirectResponse
     {
         // Cek jika kelas masih punya students
         if ($class->students()->count() > 0) {
@@ -113,7 +113,7 @@ class ClassController extends Controller
     /**
      * Manage students in class
      */
-    public function manageStudents(ClassModel $class): View
+    public function manageStudents(SchoolClass $class): View
     {
         $students = User::whereHas('studentProfile')
                     ->with('studentProfile')
@@ -124,7 +124,7 @@ class ClassController extends Controller
         return view('classes.manage-students', compact('class', 'students'));
     }
 
-    public function updateStudents(Request $request, ClassModel $class): RedirectResponse
+    public function updateStudents(Request $request, SchoolClass $class): RedirectResponse
     {
         $request->validate([
             'student_ids' => 'nullable|array',
