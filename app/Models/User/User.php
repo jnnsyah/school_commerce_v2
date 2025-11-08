@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Academic\SchoolClass;
+use App\Models\Order\Order;
 use App\Models\User\UserStudent;
 use App\Models\User\UserTeacher;
 
@@ -79,5 +80,10 @@ class User extends Authenticatable
     public function getRoleName()
     {
         return $this->roles->first()->name ?? 'No Role';
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id');
     }
 }

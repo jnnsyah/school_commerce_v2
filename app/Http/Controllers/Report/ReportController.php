@@ -50,18 +50,20 @@ class ReportController extends Controller
             ->get();
 
         // Top selling classes
-        $topClasses = SchoolClass::withCount(['products' => function($query) use ($dateRange) {
-                $query->whereHas('orderItems.order', function($q) use ($dateRange) {
-                    $q->where('status_id', 4)
-                      ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
-                });
-            }])
-            ->withSum(['products as revenue' => function($query) use ($dateRange) {
-                $query->whereHas('orderItems.order', function($q) use ($dateRange) {
-                    $q->where('status_id', 4)
-                      ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
-                });
-            }], 'order_items.subtotal')
+        // Ganti kode yang error dengan ini:
+        $topClasses = SchoolClass::selectRaw('
+                classes.*,
+                COUNT(DISTINCT products.product_id) as products_count,
+                COALESCE(SUM(order_items.subtotal), 0) as revenue
+            ')
+            ->leftJoin('products', 'classes.class_id', '=', 'products.class_id')
+            ->leftJoin('order_items', 'products.product_id', '=', 'order_items.product_id')
+            ->leftJoin('orders', function($join) use ($dateRange) {
+                $join->on('order_items.order_id', '=', 'orders.order_id')
+                    ->where('orders.status_id', 4)
+                    ->whereBetween('orders.created_at', [$dateRange['start'], $dateRange['end']]);
+            })
+            ->groupBy('classes.class_id')
             ->orderByDesc('revenue')
             ->take(10)
             ->get();
@@ -144,25 +146,32 @@ class ReportController extends Controller
     {
         $dateRange = $this->getDateRange($request);
 
+        // Revenue by Class dengan JOIN yang lebih efisien
         $revenueByClass = SchoolClass::with(['grade', 'major'])
-            ->withSum(['products as class_revenue' => function($query) use ($dateRange) {
-                $query->whereHas('orderItems.order', function($q) use ($dateRange) {
-                    $q->where('status_id', 4)
-                      ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
-                });
-            }], 'order_items.subtotal')
+            ->selectRaw('classes.*, 
+                COALESCE(SUM(order_items.subtotal), 0) as class_revenue')
+            ->leftJoin('products', 'classes.class_id', '=', 'products.class_id')
+            ->leftJoin('order_items', 'products.product_id', '=', 'order_items.product_id')
+            ->leftJoin('orders', function($join) use ($dateRange) {
+                $join->on('order_items.order_id', '=', 'orders.order_id')
+                    ->where('orders.status_id', 4)
+                    ->whereBetween('orders.created_at', [$dateRange['start'], $dateRange['end']]);
+            })
+            ->groupBy('classes.class_id')
             ->having('class_revenue', '>', 0)
             ->orderByDesc('class_revenue')
             ->get();
 
+        // Monthly Revenue (tetap sama)
         $monthlyRevenue = Order::where('status_id', 4)
-            ->whereBetween('created_at', [$dateRange['start']->subYear(), $dateRange['end']])
+            ->whereBetween('created_at', [$dateRange['start']->copy()->subYear(), $dateRange['end']])
             ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(total_amount) as revenue')
             ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')
             ->get();
 
+        // Financial Summary
         $financialSummary = [
             'total_revenue' => $revenueByClass->sum('class_revenue'),
             'average_revenue_per_class' => $revenueByClass->avg('class_revenue') ?? 0,

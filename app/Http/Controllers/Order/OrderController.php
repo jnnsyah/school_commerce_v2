@@ -79,9 +79,11 @@ class OrderController extends Controller
             abort(403);
         }
 
+        $statuses = OrderStatus::all();
+
         $order->load(['user', 'status', 'items.product.images', 'items.variant', 'items.extras.extra', 'transactionLogs']);
 
-        return view('orders.show', compact('order'));
+        return view('orders.show', compact('order', 'statuses'));
     }
 
     public function updateStatus(Request $request, Order $order)
