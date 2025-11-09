@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     require __DIR__.'/modules/academic.php';
     require __DIR__.'/modules/product.php';
     require __DIR__.'/modules/inventory.php';
+    require __DIR__.'/modules/payment.php';
     require __DIR__.'/modules/order.php';
     require __DIR__.'/modules/report.php';
 });

@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
+    protected $paymentService;
+
+    public function __construct(PaymentService $paymentService)
+    {
+        $this->paymentService = $paymentService;
+    }
+
     public function createOrderFromCart($userId, $orderData)
     {
         return DB::transaction(function () use ($userId, $orderData) {
@@ -128,6 +135,11 @@ class OrderService
                 'created_by' => $userId,
             ]);
         });
+    }
+
+    public function processPayment(Order $order, $paymentMethod = 1) // 1 = QRIS
+    {
+        return $this->paymentService->createPayment($order, $paymentMethod);
     }
 
     public function cancelOrder(Order $order, $userId)

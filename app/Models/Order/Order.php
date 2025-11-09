@@ -8,6 +8,8 @@ use App\Models\User\User;
 use App\Models\Order\OrderStatus;
 use App\Models\Order\OrderItem;
 use App\Models\Order\TransactionLog;
+use App\Models\Payment\Invoice;
+use App\Models\Payment\Payment;
 
 class Order extends Model
 {
@@ -57,10 +59,6 @@ class Order extends Model
         return $this->status_id == OrderStatus::PENDING;
     }
 
-    public function isPaid()
-    {
-        return $this->status_id == OrderStatus::PAID;
-    }
 
     public function isCompleted()
     {
@@ -88,5 +86,30 @@ class Order extends Model
             'status_id' => OrderStatus::COMPLETED,
             'completed_at' => now(),
         ]);
+    }
+
+        public function payments()
+    {
+        return $this->hasMany(Payment::class, 'order_id');
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class, 'order_id');
+    }
+
+    public function getLatestPayment()
+    {
+        return $this->payments()->latest()->first();
+    }
+
+    public function isPaid()
+    {
+        return $this->payments()->where('status_id', 2)->exists(); // status_id 2 = paid
+    }
+
+    public function getPendingPayment()
+    {
+        return $this->payments()->where('status_id', 1)->first(); // status_id 1 = pending
     }
 }

@@ -115,6 +115,25 @@
             </div>
         </div>
 
+        {{-- Tambahkan di bagian action buttons --}}
+        @if($order->status_id == 1 && $order->user_id == auth()->id()) {{-- pending dan milik user --}}
+            @if($order->getPendingPayment())
+                <a href="{{ route('payments.checkout', $order) }}" class="btn btn-success">
+                    <i class="fas fa-credit-card me-1"></i>Lanjutkan Pembayaran
+                </a>
+            @else
+                <a href="{{ route('payments.checkout', $order) }}" class="btn btn-success">
+                    <i class="fas fa-credit-card me-1"></i>Bayar Sekarang
+                </a>
+            @endif
+        @endif
+
+        @if($order->isPaid())
+            <span class="badge bg-success">
+                <i class="fas fa-check me-1"></i>Sudah Dibayar
+            </span>
+        @endif
+
         <!-- Status Update (for admin/guru) -->
         @can('order.manage')
         <div class="card shadow">
