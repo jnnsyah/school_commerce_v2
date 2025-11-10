@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Payment\PaymentController;
+use App\Http\Controllers\Admin\PaymentManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('payments')->name('payments.')->group(function () {
@@ -13,4 +14,12 @@ Route::prefix('payments')->name('payments.')->group(function () {
     
     // Midtrans callback (must be public)
     Route::post('/callback', [PaymentController::class, 'callback'])->name('callback');
+});
+
+Route::prefix('payments')->name('admin.payments.')->middleware('can:order.manage')->group(function () {
+    Route::get('/', [PaymentManagementController::class, 'index'])->name('index');
+    Route::get('/manual', [PaymentManagementController::class, 'manualIndex'])->name('manual.index');
+    Route::post('/{payment}/confirm', [PaymentManagementController::class, 'confirmPayment'])->name('confirm');
+    Route::post('/{payment}/cancel', [PaymentManagementController::class, 'cancelPayment'])->name('cancel');
+    Route::get('/{payment}/details', [PaymentManagementController::class, 'show'])->name('show');
 });

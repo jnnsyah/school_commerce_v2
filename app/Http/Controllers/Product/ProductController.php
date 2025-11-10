@@ -58,7 +58,7 @@ class ProductController extends Controller
         $statuses = ProductStatus::all();
         $classes = SchoolClass::where('is_active', true)->get();
 
-        return view('products.index', compact('products', 'categories', 'statuses', 'classes'));
+        return view('admin.products.index', compact('products', 'categories', 'statuses', 'classes'));
     }
 
     public function create()
@@ -77,7 +77,7 @@ class ProductController extends Controller
 
         $categories = ProductCategory::where('is_active', true)->get();
 
-        return view('products.create', compact('class', 'categories'));
+        return view('admin.products.create', compact('class', 'categories'));
     }
 
     public function store(ProductRequest $request)
@@ -120,7 +120,7 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('products.show', $product)
+        return redirect()->route('admin.products.show', $product)
             ->with('success', 'Product created successfully and submitted for approval.');
     }
 
@@ -134,7 +134,7 @@ class ProductController extends Controller
             abort(403, 'This product is pending approval.');
         }
 
-        return view('products.show', compact('product'));
+        return view('admin.products.show', compact('product'));
     }
 
     public function edit(Product $product)
@@ -153,7 +153,7 @@ class ProductController extends Controller
         $categories = ProductCategory::where('is_active', true)->get();
         $product->load(['images', 'variants', 'extras']);
 
-        return view('products.edit', compact('product', 'categories'));
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
     public function update(ProductRequest $request, Product $product)
@@ -189,7 +189,7 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('products.show', $product)
+        return redirect()->route('admin.products.show', $product)
             ->with('success', 'Product updated successfully.');
     }
 
@@ -208,7 +208,109 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('products.index')
+        return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+        /**
+     * User Product Listing (GoFood style)
+     */
+    public function userIndex(Request $request)
+    {
+        $query = Product::with(['class', 'category', 'images'])
+            ->where('status_id', ProductStatus::APPROVED); // Only approved products
+
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Filter by class/seller
+        if ($request->has('class_id') && $request->class_id) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        // Search by name/description
+        if ($request->has('search') && $request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%")
+                  ->orWhere('description', 'like', "%{$request->search}%");
+            });
+        }
+
+        // Filter by price range
+        if ($request->has('min_price') && $request->min_price) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->has('max_price') && $request->max_price) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        $products = $query->latest()->paginate(12);
+        $categories = ProductCategory::where('is_active', true)->get();
+        $classes = \App\Models\Academic\SchoolClass::where('is_active', true)->get();
+
+        return view('user.products.index', compact('products', 'categories', 'classes'));
+    }
+
+    /**
+     * User Product Detail
+     */
+    public function userShow(Product $product)
+    {
+        // Only show approved products to users
+        if (!$product->isApproved()) {
+            abort(404);
+        }
+
+        $product->load(['class', 'category', 'images', 'variants.variantValues', 'extras']);
+
+        return view('user.products.show', compact('product'));
+    }
+
+    /**
+     * Admin Product Listing
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = Product::with(['class', 'category', 'status', 'images']);
+
+        // Existing filter logic from original index method
+        if ($request->has('status') && $request->status) {
+            $query->where('status_id', $request->status);
+        }
+
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->has('class_id') && $request->class_id) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        // For wali_kelas, only show their class products
+        if (auth()->user()->hasRole('wali_kelas')) {
+            $class = \App\Models\Academic\SchoolClass::where('teacher_id', auth()->id())->first();
+            if ($class) {
+                $query->where('class_id', $class->class_id);
+            }
+        }
+
+        $products = $query->latest()->paginate(15);
+        $categories = ProductCategory::where('is_active', true)->get();
+        $statuses = ProductStatus::all();
+        $classes = \App\Models\Academic\SchoolClass::where('is_active', true)->get();
+
+        return view('admin.products.index', compact('products', 'categories', 'statuses', 'classes'));
+    }
+
+    /**
+     * Admin Product Detail
+     */
+    public function adminShow(Product $product)
+    {
+        $product->load(['class', 'category', 'status', 'images', 'variants.variantValues', 'extras']);
+
+        return view('admin.products.show', compact('product'));
     }
 }

@@ -4,17 +4,13 @@ namespace App\Models\Product;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Product\Product;
 
 class ProductCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'product_categories';
-    
     protected $fillable = [
         'name',
-        'description',
         'is_active',
     ];
 
@@ -28,11 +24,14 @@ class ProductCategory extends Model
         return $this->hasMany(Product::class, 'category_id');
     }
 
-    // Helper Methods
-    public function getActiveProductsCount()
+    // Scopes
+    public function scopeActive($query)
     {
-        return $this->products()->whereHas('status', function($query) {
-            $query->where('name', 'approved');
-        })->count();
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
     }
 }

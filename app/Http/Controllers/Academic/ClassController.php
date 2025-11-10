@@ -39,7 +39,7 @@ class ClassController extends Controller
         $grades = ClassGrade::all();
         $majors = ClassMajor::all();
 
-        return view('academic.classes.index', compact('classes', 'grades', 'majors'));
+        return view('admin.classes.index', compact('classes', 'grades', 'majors'));
     }
 
     public function create()
@@ -49,7 +49,7 @@ class ClassController extends Controller
         $sections = ClassSection::all();
         $teachers = User::role('wali_kelas')->whereDoesntHave('classes')->get();
 
-        return view('academic.classes.create', compact('grades', 'majors', 'sections', 'teachers'));
+        return view('admin.classes.create', compact('grades', 'majors', 'sections', 'teachers'));
     }
 
     public function store(ClassRequest $request)
@@ -72,7 +72,7 @@ class ClassController extends Controller
             $query->with('category', 'status')->latest();
         }]);
 
-        return view('academic.classes.show', compact('class'));
+        return view('admin.classes.show', compact('class'));
     }
 
     public function edit(SchoolClass $class)
@@ -89,7 +89,7 @@ class ClassController extends Controller
             })
             ->get();
 
-        return view('academic.classes.edit', compact('class', 'grades', 'majors', 'sections', 'teachers'));
+        return view('admin.classes.edit', compact('class', 'grades', 'majors', 'sections', 'teachers'));
     }
 
     public function update(ClassRequest $request, SchoolClass $class)

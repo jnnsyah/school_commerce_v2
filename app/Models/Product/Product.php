@@ -80,21 +80,6 @@ class Product extends Model
     }
 
     // Helper Methods
-    public function isPending()
-    {
-        return $this->status_id == ProductStatus::PENDING;
-    }
-
-    public function isApproved()
-    {
-        return $this->status_id == ProductStatus::APPROVED;
-    }
-
-    public function isRejected()
-    {
-        return $this->status_id == ProductStatus::REJECTED;
-    }
-
     public function getPrimaryImage()
     {
         return $this->images()->where('is_primary', true)->first();
@@ -115,5 +100,61 @@ class Product extends Model
     public function canBeOrdered()
     {
         return $this->isApproved() && $this->getStockQuantity() > 0;
+    }
+
+        /**
+     * Check if product is pending approval
+     */
+    public function isPending()
+    {
+        return $this->status_id == ProductStatus::PENDING;
+    }
+
+    /**
+     * Check if product is approved
+     */
+    public function isApproved()
+    {
+        return $this->status_id == ProductStatus::APPROVED;
+    }
+
+    /**
+     * Check if product is rejected
+     */
+    public function isRejected()
+    {
+        return $this->status_id == ProductStatus::REJECTED;
+    }
+
+    /**
+     * Scope for pending products
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status_id', ProductStatus::PENDING);
+    }
+
+    /**
+     * Scope for approved products
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('status_id', ProductStatus::APPROVED);
+    }
+
+    /**
+     * Scope for rejected products
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('status_id', ProductStatus::REJECTED);
+    }
+
+    /**
+     * Get products that need approval (for guru_pkwu)
+     */
+    public function scopeNeedsApproval($query)
+    {
+        return $query->where('status_id', ProductStatus::PENDING);
     }
 }

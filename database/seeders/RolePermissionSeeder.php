@@ -55,6 +55,8 @@ class RolePermissionSeeder extends Seeder
             // System Management
             'system.settings',
             'system.backup',
+
+            'access.merchant',
         ];
 
         foreach ($permissions as $permission) {
@@ -74,7 +76,7 @@ class RolePermissionSeeder extends Seeder
             'product.view', 'product.create', 'product.edit', 'product.delete', 'product.approve', 'product.manage',
             'order.view', 'order.create', 'order.edit', 'order.delete', 'order.confirm_payment', 'order.manage',
             'class.view', 'class.create', 'class.edit', 'class.delete', 'class.manage',
-            'report.sales', 'report.products', 'report.students', 'report.financial',
+            'report.sales', 'report.products', 'report.students', 'report.financial', 'access.merchant',
         ]);
 
         // GURU PKWU - Supervisor role
@@ -84,7 +86,7 @@ class RolePermissionSeeder extends Seeder
             'product.view', 'product.approve', 'product.manage',
             'order.view', 'order.manage', 'order.confirm_payment',
             'class.view', 'class.manage',
-            'report.sales', 'report.products', 'report.students',
+            'report.sales', 'report.products', 'report.students', 'access.merchant',
         ]);
 
         // WALI KELAS - Class manager
@@ -94,7 +96,7 @@ class RolePermissionSeeder extends Seeder
             'product.view', 'product.create', 'product.edit', 'product.delete',
             'order.view', 'order.create', 'order.edit', 'order.confirm_payment',
             'class.view', 'class.edit',
-            'report.sales', 'report.products',
+            'report.sales', 'report.products', 'access.merchant',
         ]);
 
         // GURU BIASA - Basic access

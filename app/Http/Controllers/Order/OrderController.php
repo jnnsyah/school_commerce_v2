@@ -41,7 +41,7 @@ class OrderController extends Controller
         $orders = $query->latest()->paginate(15);
         $statuses = OrderStatus::all();
 
-        return view('orders.index', compact('orders', 'statuses'));
+        return view('admin.orders.index', compact('orders', 'statuses'));
     }
 
     public function create()
@@ -55,7 +55,7 @@ class OrderController extends Controller
                 ->with('error', 'Your cart is empty. Add some products first.');
         }
 
-        return view('orders.create', compact('cart'));
+        return view('admin.orders.create', compact('cart'));
     }
 
     public function store(OrderRequest $request)
@@ -83,7 +83,7 @@ class OrderController extends Controller
 
         $order->load(['user', 'status', 'items.product.images', 'items.variant', 'items.extras.extra', 'transactionLogs']);
 
-        return view('orders.show', compact('order', 'statuses'));
+        return view('admin.orders.show', compact('order', 'statuses'));
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -122,5 +122,62 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to cancel order: ' . $e->getMessage());
         }
+    }
+    
+    /**
+     * User Order History
+     */
+    public function userIndex(Request $request)
+    {
+        $orders = Order::with(['status', 'items.product.images'])
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return view('user.orders.index', compact('orders'));
+    }
+
+    /**
+     * User Order Detail
+     */
+    public function userShow(Order $order)
+    {
+        // Check if order belongs to user
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $order->load(['status', 'items.product.images', 'items.variant', 'items.extras.extra', 'transactionLogs']);
+
+        return view('user.orders.show', compact('order'));
+    }
+
+    /**
+     * Admin Order Management
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = Order::with(['user', 'status', 'items.product']);
+
+        // Filter by status
+        if ($request->has('status') && $request->status) {
+            $query->where('status_id', $request->status);
+        }
+
+        $orders = $query->latest()->paginate(15);
+        $statuses = OrderStatus::all();
+
+        return view('admin.orders.index', compact('orders', 'statuses'));
+    }
+
+    /**
+     * Admin Order Detail
+     */
+    public function adminShow(Order $order)
+    {
+        $order->load(['user', 'status', 'items.product.images', 'items.variant', 'items.extras.extra', 'transactionLogs']);
+        $statuses = OrderStatus::all();
+
+        return view('admin.orders.show', compact('order', 'statuses'));
     }
 }

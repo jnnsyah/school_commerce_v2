@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Report\ReportController;
+use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('reports')->name('reports.')->group(function () {

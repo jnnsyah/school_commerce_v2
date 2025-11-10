@@ -1,47 +1,184 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!-- resources/views/auth/login.blade.php -->
+@extends('layouts.guest')
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+@section('title', 'Login - School Commerce')
 
-        <!-- Login Identifier (Username atau Email) -->
-        <div>
-            <x-input-label for="login" :value="__('Username atau Email')" />
-            <x-text-input id="login" class="block mt-1 w-full" type="text" name="login" :value="old('login')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('login')" class="mt-2" />
+@section('content')
+<div class="w-full max-w-md">
+    <!-- Theme Toggle for Auth Pages -->
+    <div class="flex justify-end mb-6">
+        <button onclick="toggleTheme()" 
+                class="p-2 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300 transition rounded-lg">
+            <i class="fas fa-moon dark:fa-sun"></i>
+        </button>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white dark:bg-secondary rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-accent to-blue-600 p-6 text-white text-center">
+            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-store text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">School<span class="text-white">Commerce</span></h1>
+            <p class="text-white/90 text-sm">Platform Kewirausahaan Sekolah</p>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <!-- Form Section -->
+        <div class="p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-center text-primary dark:text-light mb-2">
+                Masuk ke Akun
+            </h2>
+            <p class="text-center text-gray-600 dark:text-slate-400 text-sm mb-6">
+                Masukkan kredensial Anda untuk melanjutkan
+            </p>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <form class="space-y-4" action="{{ route('login') }}" method="POST">
+                @csrf
+                
+                <!-- Email Input -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                        Alamat Email
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input id="login" 
+                               name="login" 
+                               type="text" 
+                               autocomplete="login"
+                               required
+                               value="{{ old('login') }}"
+                               class="input-mobile block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-slate-600 
+                                      rounded-lg placeholder-gray-500 dark:placeholder-slate-400 
+                                      focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
+                                      bg-white dark:bg-secondary text-gray-900 dark:text-white
+                                      transition duration-200"
+                               placeholder="email@sekolah.sch.id">
+                    </div>
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <!-- Password Input -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input id="password" 
+                               name="password" 
+                               type="password" 
+                               autocomplete="current-password"
+                               required
+                               class="input-mobile block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-slate-600 
+                                      rounded-lg placeholder-gray-500 dark:placeholder-slate-400 
+                                      focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
+                                      bg-white dark:bg-secondary text-gray-900 dark:text-white
+                                      transition duration-200"
+                               placeholder="Masukkan password">
+                        <button type="button" 
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onclick="togglePasswordVisibility()">
+                            <i class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                        </button>
+                    </div>
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Remember & Forgot -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember_me" 
+                               name="remember" 
+                               type="checkbox"
+                               class="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded">
+                        <label for="remember_me" class="ml-2 block text-sm text-gray-900 dark:text-slate-300">
+                            Ingat saya
+                        </label>
+                    </div>
+
+                    <div class="text-sm">
+                        <a href="{{ route('password.request') }}" 
+                           class="text-accent hover:text-accent/80 font-medium transition">
+                            Lupa password?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        class="w-full flex justify-center py-3 px-4 border border-transparent 
+                               rounded-lg shadow-sm text-sm font-medium text-white bg-accent 
+                               hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 
+                               focus:ring-accent transition duration-200 transform hover:scale-[1.02] 
+                               active:scale-[0.98]">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Masuk
+                </button>
+            </form>
+
+            <!-- Register Link -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 dark:text-slate-400">
+                    Belum punya akun?
+                    <a href="{{ route('register') }}" 
+                       class="text-accent hover:text-accent/80 font-medium transition">
+                        Daftar di sini
+                    </a>
+                </p>
+            </div>
         </div>
+    </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
-            </label>
-        </div>
+    <!-- Demo Credentials Info -->
+    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <p class="text-sm text-blue-700 dark:text-blue-300 text-center">
+            <strong>Demo Access:</strong><br>
+            <span class="text-xs">Admin: admin@school.com / password</span><br>
+            <span class="text-xs">Student: student@school.com / password</span>
+        </p>
+    </div>
+</div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Lupa password?') }}
-                </a>
-            @endif
+<script>
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const icon = document.querySelector('#password + .flex button i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
 
-            <x-primary-button class="ms-3">
-                {{ __('Masuk') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+// Enhanced mobile experience
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus email field on mobile
+    if (window.innerWidth < 768) {
+        document.getElementById('email')?.focus();
+    }
+    
+    // Prevent zoom on input focus for iOS
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.fontSize = '16px';
+        });
+    });
+});
+</script>
+@endsection
