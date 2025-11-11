@@ -28,10 +28,6 @@
                     @endif
                 </p>
             </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <p class="text-sm opacity-90">{{ now()->translatedFormat('l, d F Y') }}</p>
-                <p class="text-2xl font-bold">{{ now()->format('H:i') }}</p>
-            </div>
         </div>
     </div>
 

@@ -3,6 +3,7 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'School Commerce')</title>
     
@@ -91,45 +92,63 @@
 
     <!-- Scripts -->
     <script>
-        // Cart functionality
-        let cart = {
-            items: [],
-            total: 0,
-            
-            updateCart() {
-                // Update cart badge and modal
-                const cartCount = document.getElementById('cart-count');
-                const cartTotal = document.getElementById('cart-total');
-                
-                if (cartCount) cartCount.textContent = this.items.length;
-                if (cartTotal) cartTotal.textContent = this.formatPrice(this.total);
+        // Basic cart functionality as fallback
+        const CartManager = {
+            // Simple fallback functions
+            showAddToCartModal: function(productId) {
+                console.log('Add to cart clicked for product:', productId);
+                // Fallback: redirect to product detail page
+                window.location.href = '/user/products/' + productId;
             },
-
-            formatPrice(price) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR'
-                }).format(price);
+            
+            toggleCart: function() {
+                console.log('Toggle cart clicked');
+                alert('Fitur keranjang akan tersedia sebentar lagi...');
+            },
+            
+            loadCartData: function() {
+                console.log('Loading cart data...');
             }
         };
 
-        // Toggle cart modal
-        function toggleCart() {
-            const modal = document.getElementById('cart-modal');
-            modal.classList.toggle('hidden');
-        }
+        // Make functions globally available as fallback
+        window.showAddToCartModal = CartManager.showAddToCartModal;
+        window.toggleCart = CartManager.toggleCart;
+        window.loadCartData = CartManager.loadCartData;
+    </script>
 
-        // Close cart when clicking outside
-        document.addEventListener('click', function(e) {
-            const cartModal = document.getElementById('cart-modal');
-            const cartButton = document.getElementById('cart-button');
-            
-            if (!cartModal.contains(e.target) && !cartButton.contains(e.target)) {
-                cartModal.classList.add('hidden');
+    <!-- Load main JavaScript file -->
+    <script src="{{ asset('js/user-app.js') }}"></script>
+
+    <!-- Fallback if main JS fails to load -->
+    <script>
+        window.addEventListener('load', function() {
+            // Check if main JS loaded properly
+            if (typeof window.showAddToCartModal === 'undefined' || 
+                typeof window.showAddToCartModal === 'function' && window.showAddToCartModal.toString().includes('fallback')) {
+                console.warn('Main JavaScript failed to load, using fallback functions');
+                
+                // Override button behaviors
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('[onclick*="showAddToCartModal"]')) {
+                        e.preventDefault();
+                        const match = e.target.closest('[onclick]').getAttribute('onclick').match(/showAddToCartModal\((\d+)\)/);
+                        if (match) {
+                            const productId = match[1];
+                            CartManager.showAddToCartModal(productId);
+                        }
+                    }
+                    
+                    if (e.target.closest('#cart-button') || e.target.closest('[onclick*="toggleCart"]')) {
+                        e.preventDefault();
+                        CartManager.toggleCart();
+                    }
+                });
+            } else {
+                console.log('Main JavaScript loaded successfully');
             }
         });
     </script>
-
     @stack('scripts')
 </body>
 </html>

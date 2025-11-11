@@ -217,8 +217,14 @@ class ProductController extends Controller
      */
     public function userIndex(Request $request)
     {
-        $query = Product::with(['class', 'category', 'images'])
-            ->where('status_id', ProductStatus::APPROVED); // Only approved products
+    $query = Product::with(['class', 'category', 'images', 'variants'])
+        ->where('status_id', ProductStatus::APPROVED)
+        ->where(function($q) {
+            // Product memiliki stock di variants ATAU product tanpa variant (harga utama)
+            $q->whereHas('variants', function($variantQuery) {
+                $variantQuery->where('stock_at', '>', 0);
+            })->orWhereDoesntHave('variants'); // Product tanpa variant
+        });
 
         // Filter by category
         if ($request->has('category_id') && $request->category_id) {
@@ -253,6 +259,19 @@ class ProductController extends Controller
         return view('user.products.index', compact('products', 'categories', 'classes'));
     }
 
+    public function getVariantsApi(Product $product)
+    {
+        $product->load(['variants' => function($query) {
+            $query->where('stock_at', '>', 0); // Only variants with stock
+        }, 'images']);
+
+        return response()->json([
+            'product' => $product,
+            'variants' => $product->variants,
+            'has_variants' => $product->variants->count() > 0
+        ]);
+    }
+
     /**
      * User Product Detail
      */
@@ -263,9 +282,28 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product->load(['class', 'category', 'images', 'variants.variantValues', 'extras']);
+        // Check if product has stock
+        if ($product->getStockQuantity() <= 0) {
+            abort(404, 'Product out of stock');
+        }
 
-        return view('user.products.show', compact('product'));
+        $product->load(['class.grade', 'class.major', 'category', 'images', 'variants.variantValues', 'extras']);
+
+        // Get related products (same category, approved, with stock)
+        $relatedProducts = Product::with(['class.grade', 'class.major', 'images'])
+            ->where('category_id', $product->category_id)
+            ->where('product_id', '!=', $product->product_id)
+            ->where('status_id', ProductStatus::APPROVED)
+            ->where(function($q) {
+                $q->whereHas('variants', function($variantQuery) {
+                    $variantQuery->where('stock_at', '>', 0);
+                })->orWhereDoesntHave('variants');
+            })
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
+
+        return view('user.products.show', compact('product', 'relatedProducts'));
     }
 
     /**

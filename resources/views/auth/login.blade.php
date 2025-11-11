@@ -94,26 +94,6 @@
                     @enderror
                 </div>
 
-                <!-- Remember & Forgot -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="remember_me" 
-                               name="remember" 
-                               type="checkbox"
-                               class="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded">
-                        <label for="remember_me" class="ml-2 block text-sm text-gray-900 dark:text-slate-300">
-                            Ingat saya
-                        </label>
-                    </div>
-
-                    <div class="text-sm">
-                        <a href="{{ route('password.request') }}" 
-                           class="text-accent hover:text-accent/80 font-medium transition">
-                            Lupa password?
-                        </a>
-                    </div>
-                </div>
-
                 <!-- Submit Button -->
                 <button type="submit" 
                         class="w-full flex justify-center py-3 px-4 border border-transparent 
@@ -143,8 +123,9 @@
     <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
         <p class="text-sm text-blue-700 dark:text-blue-300 text-center">
             <strong>Demo Access:</strong><br>
-            <span class="text-xs">Admin: admin@school.com / password</span><br>
-            <span class="text-xs">Student: student@school.com / password</span>
+            <span class="text-xs">Admin: admin / password123</span><br>
+            <span class="text-xs">Student: budi123 / password123</span>
+            <span class="text-xs">Guru PKWU: gurupkwu / password123</span>
         </p>
     </div>
 </div>

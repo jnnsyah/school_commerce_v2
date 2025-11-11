@@ -74,6 +74,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
+Route::middleware(['auth'])->prefix('ajax')->name('ajax.')->group(function () {
+    // Cart APIs
+    Route::get('/cart', [App\Http\Controllers\Order\CartController::class, 'getCartApi'])->name('cart.get');
+    Route::post('/cart/add', [App\Http\Controllers\Order\CartController::class, 'addItemApi'])->name('cart.add');
+    Route::put('/cart/items/{cartItem}', [App\Http\Controllers\Order\CartController::class, 'updateItemApi'])->name('cart.update');
+    Route::delete('/cart/items/{cartItem}', [App\Http\Controllers\Order\CartController::class, 'removeItemApi'])->name('cart.remove');
+    
+    // Product APIs for modal
+    Route::get('/products/{product}/variants', [App\Http\Controllers\Product\ProductController::class, 'getVariantsApi'])->name('products.variants');
+});
+
 // Fallback Route
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);

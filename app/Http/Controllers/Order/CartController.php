@@ -8,10 +8,18 @@ use App\Models\Order\CartItem;
 use App\Models\Product\Product;
 use App\Models\Product\ProductVariant;
 use App\Models\Product\ProductExtra;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
+
     public function index()
     {
         $cart = $this->getOrCreateCart();
@@ -124,5 +132,103 @@ class CartController extends Controller
         }
 
         return $product->price;
+    }
+    public function getCartApi()
+    {
+        $cart = $this->getOrCreateCart();
+        $cart->load(['items.product.images', 'items.variant', 'items.extras.extra']);
+
+        return response()->json([
+            'cart' => [
+                'items' => $cart->items,
+                'item_count' => $cart->getTotalItems(),
+                'subtotal' => $cart->getSubtotal()
+            ]
+        ]);
+    }
+    public function addItemApi(Request $request)
+    {
+        try {
+            $cartItem = $this->cartService->addToCart(
+                auth()->id(),
+                $request->product_id,
+                $request->variant_id,
+                $request->quantity,
+                $request->extras ?? []
+            );
+
+            $cart = $this->getOrCreateCart();
+            $cart->load(['items.product.images', 'items.variant', 'items.extras.extra']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart',
+                'cart' => [
+                    'items' => $cart->items,
+                    'item_count' => $cart->getTotalItems(),
+                    'subtotal' => $cart->getSubtotal()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function updateItemApi(Request $request, CartItem $cartItem)
+    {
+        // Check if cart item belongs to user
+        if ($cartItem->cart->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $updatedItem = $this->cartService->updateCartItemQuantity(
+                $cartItem->cart_item_id, 
+                $request->quantity
+            );
+
+            $cart = $this->getOrCreateCart();
+            $cart->load(['items.product.images', 'items.variant', 'items.extras.extra']);
+
+            return response()->json([
+                'success' => true,
+                'cart' => [
+                    'items' => $cart->items,
+                    'item_count' => $cart->getTotalItems(),
+                    'subtotal' => $cart->getSubtotal()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function removeItemApi(CartItem $cartItem)
+    {
+        if ($cartItem->cart->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $this->cartService->removeFromCart($cartItem->cart_item_id);
+
+        $cart = $this->getOrCreateCart();
+        $cart->load(['items.product.images', 'items.variant', 'items.extras.extra']);
+
+        return response()->json([
+            'success' => true,
+            'cart' => [
+                'items' => $cart->items,
+                'item_count' => $cart->getTotalItems(),
+                'subtotal' => $cart->getSubtotal()
+            ]
+        ]);
     }
 }
